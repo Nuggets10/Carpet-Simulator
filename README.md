@@ -21,7 +21,23 @@ Tokens are made by both letters and numbers. Trying logging in with an expired o
 ## 📈 | Usage
 
 ## ✏️ | CSV Format
+CSV files are used to store tabular data. For the program to run properly, the CSV must meet the following requirements:
+- At least 3 columns, named "Date", "MaxPrice, "MinPrice" without the quotes. The order of the columns does NOT matter. The "Date" field is self explanatory, "MaxPrice" is the max price registered at the current date, while "MinPrice" is the minimum price registered at the current date.
+- Dates sorted in a reverse chronological order. For example, the first row after the header must have the most recent data. This is the default format provided by Finance Data websites such as Yahoo Finance and Borsa italiana.
 
+The following are a couple examples of correct CSV files:
+
+| Date  | MaxPrice | MinPrice |
+| ------------- | ------------- | ------------- |
+| 01/01/2025  | 5.00  | 3.70 |
+| 02/01/2025  | 4.80  | 4 |
+
+| MinPrice | MaxPrice | Date |
+| ------------- | ------------- | ------------- |
+| 3.70  | 5.00  | 01/01/2025 |
+| 4 | 4.80  | 02/01/2025 |
+
+(Please note that the CSV file can be of any lenght you desire)
 ## 📸 | Screenshots
 
 ## 🖼 | Flaticon
