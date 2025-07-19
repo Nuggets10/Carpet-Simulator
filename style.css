@@ -1,0 +1,430 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background-color: #000;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100vh;
+}
+
+.sidebar {
+  background-color: #1e1e1e;
+  padding: 20px;
+  width: 280px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: scroll;
+  max-height: 100vh;
+}
+
+
+.sidebar h2 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input-form label {
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.input-form input {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #333;
+  color: #fff;
+}
+
+.input-form input::placeholder {
+  color: #8f8f8f;
+}
+
+.input-form button {
+  padding: 12px;
+  margin-top: 10px;
+  background-color: #00d619;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;;
+}
+
+.input-form button:hover {
+  background-color: #03a300;
+  transform: scale(1.05);
+}
+
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: unset;
+    overflow-y: scroll;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 12px;
+  background-color: #0079d6;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.upload-button:hover {
+  background-color: #0065a3;
+  transform: scale(1.05);
+}
+
+#GithubButton {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#GithubButton img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: auto;
+}
+
+.github-link {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  display: inline-block;
+  overflow: visible;
+  z-index: 9;
+}
+
+.hover-text {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px);
+  opacity: 0;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #ffffff;
+  pointer-events: none;
+  transition: none;
+}
+
+.github-link:hover .hover-text {
+  opacity: 1;
+  animation: slideUpLeft 1s forwards;
+}
+
+.github-link:not(:hover) .hover-text {
+  animation: slideDown 0.5s forwards;
+}
+
+@keyframes slideUpLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-150%) translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 1;
+    transform: translateX(-150%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(40px);
+  }
+}
+
+#XButton {
+  position: fixed;
+  bottom: 60px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#XButton img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: auto;
+}
+
+.x-link {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  display: inline-block;
+  overflow: visible;
+  z-index: 9;
+}
+
+.hover-text {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px);
+  opacity: 0;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #ffffff;
+  pointer-events: none;
+  transition: none;
+}
+
+.x-link:hover .hover-text {
+  opacity: 1;
+  animation: slideUpLeft 1s forwards;
+}
+
+.x-link:not(:hover) .hover-text {
+  animation: slideDown 0.5s forwards;
+}
+
+.charts-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  padding: 40px 20px 0 20px;
+  background-color: #000;
+}
+
+.chart-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+}
+
+.chart-block h3 {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.chart-block canvas {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+}
+
+.chart-footer-text {
+  text-align: center;
+  padding: 80px 0;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .charts-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+}
+
+#loginOverlay {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box {
+  background-color: #1e1e1e;
+  padding: 40px 30px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.login-box h2 {
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #333;
+  color: #fff;
+}
+
+.login-box button:not(.toggle-password) {
+  width: 100%;
+  padding: 12px;
+  background-color: #00d619;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-box button:not(.toggle-password):hover {
+  background-color: #03a300;
+  transform: scale(1.05);
+}
+
+.toggle-password {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.toggle-password:hover {
+  background-color: #666;
+  transform: scale(1.05);
+}
+
+#loginError {
+  color: #ff4d4d;
+  margin-top: 10px;
+  display: none;
+}
+
+.login-title {
+  position: absolute;
+  top: 10%;
+  text-align: center;
+  width: 100%;
+  color: #fff;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.version-text {
+  position: absolute;
+  top: 0;
+  left: 290px;
+  margin: 0;
+}
+
+#FlaticonButton {
+  position: fixed;
+  bottom: 110px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#FlaticonButton img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: auto;
+}
+
+.flaticon-link {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  display: inline-block;
+  overflow: visible;
+  z-index: 9;
+}
+
+.hover-text {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px);
+  opacity: 0;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #ffffff;
+  pointer-events: none;
+  transition: none;
+}
+
+.flaticon-link:hover .hover-text {
+  opacity: 1;
+  animation: slideUpLeft 1s forwards;
+}
+
+.flaticon-link:not(:hover) .hover-text {
+  animation: slideDown 0.5s forwards;
+}
