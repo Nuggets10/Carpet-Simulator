@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" type="image/x-icon" href="Assets/favicon.ico">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carpet Simulator</title>
+  <link href="style.css" rel="stylesheet" />
+  <script src="login.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  
+  <!-- Login -->
+  <div id="loginOverlay">
+    <div class="login-title">Carpet Simulator</div>
+    <div class="login-box">
+      <h2>Access token required</h2>
+
+      <input type="password" id="loginPassword" placeholder="Enter access token" />
+
+      <button type="button" id="togglePassword" class="toggle-password">Show access token</button>
+
+      <button onclick="checkPassword()">Login</button>
+
+      <p id="loginError">
+        Incorrect or expired access token.
+        <a href="https://example.com/help" target="_blank" style="color: #ffffff; text-decoration: underline;">
+          Get the latest one on X.
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="container">
+    <aside class="sidebar">
+      <h2 style="text-align: center;">Carpet Simulator</h2>
+      <div class="input-form">
+        <label for="LowestBuyPrice">Lowest buy price:</label>
+        <input type="number" id="LowestBuyPrice" name="LowestBuyPrice" placeholder="Ex: 5.30" step="0.01"/>
+
+        <label for="HighestBuyPrice">Highest buy price:</label>
+        <input type="number" id="HighestBuyPrice" name="HighestBuyPrice" placeholder="Ex: 3.50" step="0.01"/>
+
+        <label for="BuyStep">Buy step:</label>
+        <input type="number" id="BuyStep" name="BuyStep" placeholder="Ex: 0.10" step="0.01"/>
+
+        <label for="SellTake">Sell Take:</label>
+        <input type="number" id="SellTake" name="SellTake" placeholder="Ex: 0.50" step="0.01"/>
+
+        <label for="SharesPerPacket">Number of shares per packet:</label>
+        <input type="number" id="SharesPerPacket" name="SharesPerPacket" placeholder="Ex: 100" step="0.01"/>
+
+        <label for="Funds">Available funds:</label>
+        <input type="number" id="Funds" name="Funds" placeholder="Ex: 10000" step="0.01"/>
+
+        <label for="Commissions">Commissions tax:</label>
+        <input type="number" id="Commissions" name="Commissions" placeholder="Ex: 5.00" step="0.01"/>
+
+        <label for="csvFile">CSV file:</label>
+        <input type="file" id="csvFile" name="csvFile" accept=".csv" hidden />
+        <label for="csvFile" class="upload-button">Upload CSV File</label>
+
+        <button type="button" id="startButton">Start</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- Charts -->
+      <section class="charts-container">
+        <div class="chart-block">
+          <h3>Sold/Leftover packets</h3>
+          <canvas id="packetsChart"></canvas>
+        </div>
+        <div class="chart-block">
+          <h3>Taxes</h3>
+          <canvas id="taxesChart"></canvas>
+        </div>
+        <div class="chart-block">
+          <h3>Plus/Minus valence</h3>
+          <canvas id="valenceChart"></canvas>
+        </div>
+      </section>
+      <div class="chart-footer-text">
+        <p id="profitText">Final capital: 0</p>
+        <canvas id="profitLineChart" width="600" height="200"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <script src="simulation.js"></script>
+  <script src="chartsInstancer.js"></script>
+
+  <div class="version-text"">
+    <p>v1.0.0</p>
+  </div>
+
+  <!-- GitHub -->
+  <a href="https://github.com/Nuggets10/Carpet-Simulator" target="_blank" rel="noopener noreferrer" class="github-link">
+    <button id="GithubButton">
+      <img src="Assets/GithubIcon.png" />
+    </button>
+    <span class="hover-text">Give a ⭐ on Github</span>
+  </a>
+
+  <!-- X -->
+  <a href="https://github.com/Nuggets10" target="_blank" rel="noopener noreferrer" class="x-link">
+    <button id="XButton">
+      <img src="Assets/XIcon.png" />
+    </button>
+    <span class="hover-text">Endorse the project on X</span>
+  </a>
+
+  <!-- Flaticon -->
+  <a href="https://github.com/Nuggets10/Carpet-Simulator?tab=readme-ov-file#--flaticon" target="_blank" rel="noopener noreferrer" class="flaticon-link">
+    <button id="FlaticonButton">
+      <img src="Assets/Flaticon.png" />
+    </button>
+    <span class="hover-text">Flaticon images attribution</span>
+  </a>
+</body>
+
+</html>
