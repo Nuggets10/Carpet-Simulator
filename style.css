@@ -78,6 +78,24 @@ body {
   transform: scale(1.05);
 }
 
+.input-form .download-button {
+  padding: 12px;
+  margin-top: 10px;
+  background-color: #0079d6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.input-form .download-button:hover {
+  background-color: #0065a3;
+  transform: scale(1.05);
+}
+
+
 .main-content {
   flex: 1;
   padding: 40px;
@@ -427,4 +445,89 @@ body {
 
 .flaticon-link:not(:hover) .hover-text {
   animation: slideDown 0.5s forwards;
+}
+
+#downloadOverlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px); /* Optional: adds a blur effect to background */
+}
+
+.download-box {
+  background-color: #1e1e1e;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.download-box h2 {
+  color: #fff;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.download-box select,
+.download-box input {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #333;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.download-box select {
+  appearance: none; /* Remove default arrow */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23fff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); /* Custom arrow */
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+.download-box input::placeholder {
+  color: #8f8f8f;
+}
+
+.download-box button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.download-box #downloadDataButton {
+  background-color: #00d619;
+  color: #fff;
+}
+
+.download-box #downloadDataButton:hover {
+  background-color: #03a300;
+  transform: scale(1.05);
+}
+
+.download-box .close-button {
+  background-color: #ff0000;
+  color: #fff;
+}
+
+.download-box .close-button:hover {
+  background-color: #bd0000;
+  transform: scale(1.05);
 }
