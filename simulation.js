@@ -9,21 +9,6 @@ document.getElementById('startButton').addEventListener('click', function () {
   const commissions = document.getElementById('Commissions').value.replace(',', '.');
   const csvFile = document.getElementById('csvFile').files[0];
 
-  if (highestBuyPriceNum < lowestBuyPriceNum) {
-    alert('Error: The maximum price cannot be lower than the minimum price.');
-    return;
-  }
-
-  if (sharesPerPacket == 0) {
-    alert('Error: The number of shares per packet cannot be 0.');
-    return;
-  }
-
-  if (buyStep == 0) {
-    alert('Error: The BuyStep value cannot be 0.');
-    return;
-  }
-
   // Convert to numbers
   const lowestBuyPriceNum = parseFloat(lowestBuyPrice);
   const highestBuyPriceNum = parseFloat(highestBuyPrice);
@@ -136,13 +121,13 @@ function runSimulation(cleanedCSV, params) {
 
   // Simulate for each day
   data.forEach(day => {
-    const { Date, MaxPrice, MinimumPrice } = day;
+    const { Date, MaxPrice, MinPrice } = day; // Correzione: uso MinPrice invece di MinimumPrice
 
     // Buy
     buyLevels.forEach(level => {
       const packetCost = level * sharesPerPacket;
       const totalCost = packetCost + commissions;
-      if (MinimumPrice <= level && level <= MaxPrice && capital >= totalCost) {
+      if (MinPrice <= level && level <= MaxPrice && capital >= totalCost) {
         packets.push({
           purchasePrice: level,
           shares: sharesPerPacket,
