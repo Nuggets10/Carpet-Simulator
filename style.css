@@ -454,11 +454,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(5px); /* Optional: adds a blur effect to background */
+  backdrop-filter: blur(5px);
 }
 
 .download-box {
@@ -491,7 +491,7 @@ body {
 }
 
 .download-box select {
-  appearance: none; /* Remove default arrow */
+  appearance: none;
   background-image: url('data:image/svg+xml;utf8,<svg fill="%23fff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); /* Custom arrow */
   background-repeat: no-repeat;
   background-position: right 10px center;
