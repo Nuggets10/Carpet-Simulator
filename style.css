@@ -490,14 +490,6 @@ body {
   font-size: 0.9rem;
 }
 
-.download-box select {
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23fff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); /* Custom arrow */
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-}
-
 .download-box input::placeholder {
   color: #8f8f8f;
 }
