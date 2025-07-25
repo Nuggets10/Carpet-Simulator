@@ -8,6 +8,9 @@ document.getElementById('startButton').addEventListener('click', function () {
   let funds = document.getElementById('Funds').value.replace(',', '.');
   const commissions = document.getElementById('Commissions').value.replace(',', '.');
   const csvFile = document.getElementById('csvFile').files[0];
+  const checkbox = document.getElementById("reverseCheckbox");
+  
+  const isReverse = checkbox.checked;
 
   // Convert to numbers
   const lowestBuyPriceNum = parseFloat(lowestBuyPrice);
@@ -36,7 +39,8 @@ document.getElementById('startButton').addEventListener('click', function () {
       sellTake: sellTakeNum,
       sharesPerPacket: sharesPerPacketNum,
       funds: fundsNum,
-      commissions: commissionsNum
+      commissions: commissionsNum,
+      isReverse: isReverse
     });
   });
 });
@@ -48,27 +52,26 @@ function validateAndCleanCSV(file, callback) {
     const lines = text.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
 
-    const requiredHeaders = ['Date', 'MaxPrice', 'MinPrice'];
+    const requiredHeaders = ['Date', 'MaxPrice', 'MinPrice', "ClosePrice"];
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
 
     if (missingHeaders.length > 0) {
-      callback(`Error: missing columns in CSV file: ${missingHeaders.join(', ')} The file must at least have a column named Date, one named MaxPrice and one MinimumPrice. The order does not matter. For examples check the Github repo.`, null);
+      callback("Error: missing columns in CSV file: ${missingHeaders.join(', ')} The file must at least have a column named Date, one named MaxPrice and one MinimumPrice. The order does not matter. For examples check the Github repo.", null);
       return;
     }
 
     const indices = requiredHeaders.map(h => headers.indexOf(h));
-    const dateIndex = indices[requiredHeaders.indexOf('Date')]; // Get the index of the Date column
+    const dateIndex = indices[requiredHeaders.indexOf('Date')];
 
     const cleanedCSV = lines.map((line, index) => {
       const cells = line.split(',');
       if (index === 0) {
-        // Keep the header row unchanged
         return indices.map(i => cells[i]).join(',');
       } else {
-        // Process data rows
+
         return indices.map((i, colIndex) => {
           if (colIndex === requiredHeaders.indexOf('Date')) {
-            // Extract only the day (DD) from YYYY-MM-DD
+
             const dateParts = cells[i].split('-');
             return dateParts.length === 3 ? dateParts[2] : cells[i]; // Return DD or original if format is invalid
           }
@@ -88,6 +91,9 @@ function validateAndCleanCSV(file, callback) {
 }
 
 function runSimulation(cleanedCSV, params) {
+
+  console.log("Inizio simulazione")
+  
   const {
     lowestBuyPrice,
     highestBuyPrice,
@@ -95,14 +101,18 @@ function runSimulation(cleanedCSV, params) {
     sellTake,
     sharesPerPacket,
     funds,
-    commissions
+    commissions,
+    isReverse
   } = params;
 
-  // Convert CSV into an object array
-  const data = parseCSV(cleanedCSV).reverse();
+  let data = parseCSV(cleanedCSV);
 
-  // Statistics declaration
+  if (isReverse == true) {
+      data = data.reverse();
+  }
+
   let packets = [];
+  let ownedPackets = []; // MODIFICATO CAPITAL GAINS TAX
   let capital = funds;
   let totalGain = 0;
   let packetsBought = 0;
@@ -112,26 +122,37 @@ function runSimulation(cleanedCSV, params) {
   let packetsInPlus = 0;
   let packetsInMinus = 0;
   let capitalHistory = [{ date: 'Start', capital: funds }];
+  let equity = capital;
 
   // Generate buy levels
-  const buyLevels = [];
+  let buyLevels = [];
   for (let price = highestBuyPrice; price >= lowestBuyPrice; price -= buyStep) {
     buyLevels.push(price);
   }
 
+  console.log("")
+  console.log("Livelli di acquisto: " + buyLevels)
+
   // Simulate for each day
   data.forEach(day => {
-    const { Date, MaxPrice, MinPrice } = day; // Correzione: uso MinPrice invece di MinimumPrice
+    let { Date, MaxPrice, MinPrice, ClosePrice } = day;
 
     // Buy
     buyLevels.forEach(level => {
-      const packetCost = level * sharesPerPacket;
-      const totalCost = packetCost + commissions;
-      if (MinPrice <= level && level <= MaxPrice && capital >= totalCost) {
+      let packetCost = level * sharesPerPacket;
+      let totalCost = packetCost + commissions;
+      let isLevelAlreadyBought = packets.some(p => p.purchasePrice === level);
+      if (MinPrice <= level && level <= MaxPrice && capital >= totalCost && !isLevelAlreadyBought) {
+        console.log("Comprato pacchetto a livello " + level + " il " + Date + " per (con commissioni) " + totalCost)
         packets.push({
           purchasePrice: level,
           shares: sharesPerPacket,
           purchaseDate: Date
+        });
+        ownedPackets.push({
+            purchasePrice: level,
+            shares: sharesPerPacket,
+            purchaseDate: Date
         });
         capital -= totalCost;
         packetsBought++;
@@ -139,22 +160,29 @@ function runSimulation(cleanedCSV, params) {
       }
     });
 
+    console.log("Capitale pari a " + capital + " dopo acquisti della giornata: " + Date)
+
     // Sell
-    const packetsToSell = packets.filter(p => MaxPrice >= p.purchasePrice + sellTake);
+    let packetsToSell = packets.filter(p => MaxPrice >= p.purchasePrice + sellTake);
     if (packetsToSell.length > 0) {
-      const sumTargetPrices = packetsToSell.reduce((sum, p) => sum + (p.purchasePrice + sellTake), 0);
-      const averageSellPrice = sumTargetPrices / packetsToSell.length;
+      const sumPurchasePrices = ownedPackets.reduce((sum, p) => sum + p.purchasePrice, 0); // MODIFICATO CAPITAL GAINS TAX
+      const averagePurchasePrice = sumPurchasePrices / ownedPackets.length; // MODIFICATO CAPITAL GAINS TAX
 
       packetsToSell.forEach(p => {
         const targetSellPrice = p.purchasePrice + sellTake;
-        const isInPlus = targetSellPrice > averageSellPrice;
+        const isInPlus = targetSellPrice > averagePurchasePrice;
         const grossProceeds = targetSellPrice * p.shares;
         const profit = grossProceeds - (p.purchasePrice * p.shares);
-        const capitalGainTax = (profit > 0 && isInPlus) ? profit * 0.26 : 0;
+        const capitalGainTax = (profit > 0 && isInPlus) ? profit * 0.26 : 0; // MODIFICATO CAPITAL GAINS TAX
         const netProceeds = grossProceeds - commissions - capitalGainTax;
+
+        console.log("Venduto pacchetto acquistato a " + p.purchasePrice + " il " + Date + " per " + (p.purchasePrice + sellTake) + " Dopo tasse: " + netProceeds)
 
         totalGain += (netProceeds - (p.purchasePrice * p.shares));
         capital += netProceeds;
+
+        console.log("Capitale pari a " + capital + " dopo vendita della giornata: " + Date + " del pacchetto con profitto netto di: " + netProceeds)
+        
         commissionsPaid += commissions;
         capitalGainsTaxPaid += capitalGainTax;
 
@@ -170,11 +198,16 @@ function runSimulation(cleanedCSV, params) {
       // Remove sold packets
       packets = packets.filter(p => !packetsToSell.includes(p));
     }
-    capitalHistory.push({ date: Date, capital: capital });
+    equity = capital + packets.length * sharesPerPacket * ClosePrice;
+    capitalHistory.push({ date: Date, capital: equity });
   });
 
   const residualValue = packets.reduce((sum, p) => sum + (p.purchasePrice * p.shares), 0);
   const packetsLeft = packets.length;
+  console.log("")
+  console.log("Fine simulazione")
+  console.log("Capitale residuo: " + capital)
+  console.log("Pacchetti residui: " + packetsLeft + " il cui valore è: " + residualValue)
   const finalGain = capital - funds;
 
   displayResults({
@@ -189,7 +222,8 @@ function runSimulation(cleanedCSV, params) {
     packetsInPlus,
     packetsInMinus,
     finalGain,
-    capitalHistory
+    capitalHistory,
+    equity
   });
 }
 
@@ -203,9 +237,9 @@ function parseCSV(csv) {
       return obj;
     }, {});
     // Verify date format
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(obj.Date)) {
-      console.warn(`Date format not valid at line ${index + 2}: ${obj.Date}`);
-    }
+    //if (!/^\d{4}-\d{2}-\d{2}$/.test(obj.Date)) {
+      //console.warn(`Date format not valid at line ${index + 2}: ${obj.Date}`);
+    //}
     return obj;
   });
 }
@@ -222,7 +256,8 @@ function displayResults(results) {
     capitalGainsTaxPaid,
     packetsInPlus,
     packetsInMinus,
-    capitalHistory
+    capitalHistory,
+    equity
   } = results;
 
   const resultMessage = `
@@ -251,7 +286,8 @@ Packets Sold in Minus Valence: ${packetsInMinus}
     packetsInMinus,
     totalGain,
     capital,
-    capitalHistory
+    capitalHistory,
+    equity
   });
 }
 
@@ -262,9 +298,8 @@ function updateCharts({
   capitalGainsTaxPaid,
   packetsInPlus,
   packetsInMinus,
-  totalGain,
-  capital,
-  capitalHistory
+  capitalHistory,
+  equity
 }) {
   // Packets chart
   const packetsChart = Chart.getChart('packetsChart');
@@ -293,10 +328,10 @@ function updateCharts({
     console.error('Valence Chart not found.');
   }
 
-  capital = Math.round(capital)
+  equity = Math.round(equity)
 
   const profitLossElement = document.getElementById('profitText');
-  profitLossElement.textContent = `Final capital: ${capital}`;
+  profitLossElement.textContent = `Final capital: ${equity}`;
 
   // Line chart
   const profitLineChart = Chart.getChart('profitLineChart');
@@ -322,4 +357,4 @@ function updateCharts({
   } else {
     console.error('Profit Line Chart not found.');
   }
-  }
+}
