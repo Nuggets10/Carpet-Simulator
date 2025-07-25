@@ -83,6 +83,9 @@
         <label for="csvFile">CSV file:</label>
         <input type="file" id="csvFile" name="csvFile" accept=".csv" hidden />
         <label for="csvFile" class="upload-button">Upload CSV File</label>
+        
+        <label for="reverseCheckbox"> Reverse CSV</label>
+        <input type="checkbox" id="reverseCheckbox" name="reverseCheckBox" value="" checked>
 
         <button type="button" id="startButton">Start</button>
 
@@ -112,12 +115,13 @@
     </main>
   </div>
 
+  <script type='text/javascript' src='config.js'></script>
   <script src="simulation.js"></script>
   <script src="chartsInstancer.js"></script>
   <script src="download.js"></script>
 
   <div class="version-text"">
-    <p>v1.0.0</p>
+    <p>v1.2.0</p>
   </div>
 
   <!-- GitHub -->
