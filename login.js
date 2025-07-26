@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function checkPassword() {
-  const correctPassword = "build1.0.0";
+  const correctPassword = "a";
   const enteredPassword = document.getElementById("loginPassword").value;
   const errorMsg = document.getElementById("loginError");
 

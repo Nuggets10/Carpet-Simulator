@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await response.json();
 
           const timeSeries = data['Time Series (Daily)'];
-          const headers = ['Date', 'MaxPrice', 'MinPrice'];
+          const headers = ['Date', 'MaxPrice', 'MinPrice', 'ClosePrice'];
           const csvRows = [headers.join(',')];
 
           for (const [date, values] of Object.entries(timeSeries)) {
@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   const row = [
                       date,
                       values['2. high'],
-                      values['3. low']
+                      values['3. low'],
+                      values['4. close']
                   ];
                   csvRows.push(row.join(','));
               }
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url);
             const data = await response.json();
 
-            const headers = ['Date', 'MaxPrice', 'MinPrice'];
+            const headers = ['Date', 'MaxPrice', 'MinPrice', 'ClosePrice'];
             const csvRows = [headers.join(',')];
 
             const sortedData = data.historical.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -76,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const row = [
                         entry.date,
                         entry.high,
-                        entry.low
+                        entry.low,
+                        entry.close
                     ];
                     csvRows.push(row.join(','));
                 }
