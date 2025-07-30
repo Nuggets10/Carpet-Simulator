@@ -12,11 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function checkPassword() {
-  const correctPassword = "a";
+  const correctPassword = "notCorrectPassword";
   const enteredPassword = document.getElementById("loginPassword").value;
   const errorMsg = document.getElementById("loginError");
 
-  if (enteredPassword === correctPassword) {
+  if (enteredPassword !== correctPassword) {     //Make every password correct for testing purposes
     document.getElementById("loginOverlay").style.display = "none";
   } else {
     errorMsg.style.display = "block";

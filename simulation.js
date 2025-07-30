@@ -49,32 +49,28 @@ function validateAndCleanCSV(file, callback) {
   const reader = new FileReader();
   reader.onload = function (e) {
     const text = e.target.result;
-    const lines = text.trim().split('\n');
+    // Normalize line endings and trim whitespace
+    const lines = text.replace(/\r\n/g, '\n').trim().split('\n').map(line => line.trim());
     const headers = lines[0].split(',').map(h => h.trim());
 
-    const requiredHeaders = ['Date', 'MaxPrice', 'MinPrice', "ClosePrice"];
+    const requiredHeaders = ['Date', 'MaxPrice', 'MinPrice', 'ClosePrice'];
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
 
     if (missingHeaders.length > 0) {
-      callback("Error: missing columns in CSV file: ${missingHeaders.join(', ')} The file must at least have a column named Date, one named MaxPrice and one MinimumPrice. The order does not matter. For examples check the Github repo.", null);
+      callback(`Error: missing columns in CSV file: ${missingHeaders.join(', ')}. The file must at least have a column named Date, one named MaxPrice, one named MinPrice, and one named ClosePrice. The order does not matter. For examples, check the GitHub repo.`, null);
       return;
     }
 
     const indices = requiredHeaders.map(h => headers.indexOf(h));
-    const dateIndex = indices[requiredHeaders.indexOf('Date')];
 
     const cleanedCSV = lines.map((line, index) => {
-      const cells = line.split(',');
+      const cells = line.split(',').map(cell => cell.trim());
       if (index === 0) {
+        // Keep only required headers
         return indices.map(i => cells[i]).join(',');
       } else {
-
         return indices.map((i, colIndex) => {
-          if (colIndex === requiredHeaders.indexOf('Date')) {
-
-            const dateParts = cells[i].split('-');
-            return dateParts.length === 3 ? dateParts[2] : cells[i]; // Return DD or original if format is invalid
-          }
+          // Treat Date column as a string, no validation
           return cells[i];
         }).join(',');
       }
@@ -135,7 +131,8 @@ function runSimulation(cleanedCSV, params) {
 
   // Simulate for each day
   data.forEach(day => {
-    let { Date, MaxPrice, MinPrice, ClosePrice } = day;
+    let { Date: date, MaxPrice, MinPrice, ClosePrice } = day;
+    console.log(date, MaxPrice, MinPrice, ClosePrice)
 
     // Buy
     buyLevels.forEach(level => {
@@ -143,16 +140,17 @@ function runSimulation(cleanedCSV, params) {
       let totalCost = packetCost + commissions;
       let isLevelAlreadyBought = packets.some(p => p.purchasePrice === level);
       if (MinPrice <= level && level <= MaxPrice && capital >= totalCost && !isLevelAlreadyBought) {
-        console.log("Comprato pacchetto a livello " + level + " il " + Date + " per (con commissioni) " + totalCost)
+        console.log("Comprato pacchetto a livello " + level + " il " + date + " per (con commissioni) " + totalCost)
+        addLogEntry(date, "Buy", "Bought packet at " + level + " for " + totalCost)
         packets.push({
           purchasePrice: level,
           shares: sharesPerPacket,
-          purchaseDate: Date
+          purchaseDate: date
         });
         ownedPackets.push({
             purchasePrice: level,
             shares: sharesPerPacket,
-            purchaseDate: Date
+            purchaseDate: date
         });
         capital -= totalCost;
         packetsBought++;
@@ -160,7 +158,7 @@ function runSimulation(cleanedCSV, params) {
       }
     });
 
-    console.log("Capitale pari a " + capital + " dopo acquisti della giornata: " + Date)
+    console.log("Capitale pari a " + capital + " dopo acquisti della giornata: " + date)
 
     // Sell
     let packetsToSell = packets.filter(p => MaxPrice >= p.purchasePrice + sellTake);
@@ -176,12 +174,13 @@ function runSimulation(cleanedCSV, params) {
         const capitalGainTax = (profit > 0 && isInPlus) ? profit * 0.26 : 0; // MODIFICATO CAPITAL GAINS TAX
         const netProceeds = grossProceeds - commissions - capitalGainTax;
 
-        console.log("Venduto pacchetto acquistato a " + p.purchasePrice + " il " + Date + " per " + (p.purchasePrice + sellTake) + " Dopo tasse: " + netProceeds)
+        console.log("Venduto pacchetto acquistato a " + p.purchasePrice + " il " + date + " per " + (p.purchasePrice + sellTake) + " Dopo tasse: " + netProceeds)
+        addLogEntry(date, "Sell", "Sold packet at " + p.purchasePrice + " for " + netProceeds)
 
         totalGain += (netProceeds - (p.purchasePrice * p.shares));
         capital += netProceeds;
 
-        console.log("Capitale pari a " + capital + " dopo vendita della giornata: " + Date + " del pacchetto con profitto netto di: " + netProceeds)
+        console.log("Capitale pari a " + capital + " dopo vendita della giornata: " + date + " del pacchetto con profitto netto di: " + netProceeds)
         
         commissionsPaid += commissions;
         capitalGainsTaxPaid += capitalGainTax;
@@ -199,7 +198,7 @@ function runSimulation(cleanedCSV, params) {
       packets = packets.filter(p => !packetsToSell.includes(p));
     }
     equity = capital + packets.length * sharesPerPacket * ClosePrice;
-    capitalHistory.push({ date: Date, capital: equity });
+    capitalHistory.push({ date: date, capital: equity });
   });
 
   const residualValue = packets.reduce((sum, p) => sum + (p.purchasePrice * p.shares), 0);
@@ -229,19 +228,39 @@ function runSimulation(cleanedCSV, params) {
 
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
-  const headers = lines[0].split(',');
+  const headers = lines[0].split(',').map(h => h.trim());
   return lines.slice(1).map((line, index) => {
-    const values = line.split(',');
+    const values = line.split(',').map(v => v.trim());
     const obj = headers.reduce((obj, header, index) => {
-      obj[header] = parseFloat(values[index]) || values[index];
+      if (header === 'Date') {
+        obj[header] = values[index];
+      } else {
+        obj[header] = parseFloat(values[index]) || values[index];
+      }
       return obj;
     }, {});
-    // Verify date format
-    //if (!/^\d{4}-\d{2}-\d{2}$/.test(obj.Date)) {
-      //console.warn(`Date format not valid at line ${index + 2}: ${obj.Date}`);
-    //}
     return obj;
   });
+}
+
+function addLogEntry(date, type, content) {
+  const tableBody = document.querySelector('#logTable tbody');
+  const row = document.createElement('tr');
+
+  const dateCell = document.createElement('td');
+  dateCell.textContent = date;
+
+  const typeCell = document.createElement('td');
+  typeCell.textContent = type;
+
+  const contentCell = document.createElement('td');
+  contentCell.textContent = content;
+
+  row.appendChild(dateCell);
+  row.appendChild(typeCell);
+  row.appendChild(contentCell);
+
+  tableBody.appendChild(row);
 }
 
 function displayResults(results) {
@@ -333,28 +352,70 @@ function updateCharts({
   const profitLossElement = document.getElementById('profitText');
   profitLossElement.textContent = `Final capital: ${equity}`;
 
-  // Line chart
   const profitLineChart = Chart.getChart('profitLineChart');
   if (profitLineChart) {
     const labels = capitalHistory.map(entry => {
       if (entry.date === 'Start') return 'Start';
-      return `D:${entry.date}`;
+      return entry.date;
     });
     const dataPoints = capitalHistory.map(entry => entry.capital);
-
+  
     profitLineChart.data.labels = labels;
     profitLineChart.data.datasets[0].data = dataPoints;
+  
+    // Calcolo dei nuovi limiti
+    const xMin = 0;
+    const xMax = labels.length - 1;
+    const yMin = Math.min(...dataPoints);
+    const yMax = Math.max(...dataPoints);
+    const yRange = yMax - yMin || 1;
+  
+    // Aggiornamento delle scale e dei limiti di zoom/pan
     profitLineChart.options.scales.x = {
       type: 'category',
       ticks: {
         maxTicksLimit: 20,
         autoSkip: true,
         maxRotation: 45,
-        minRotation: 45
-      }
+        minRotation: 45,
+        color: '#ffffff'
+      },
+      grid: { color: '#444' }
     };
+    profitLineChart.options.scales.y = {
+      ticks: { color: '#ffffff' },
+      grid: { color: '#444' }
+    };
+  
+    profitLineChart.options.plugins.zoom = {
+      pan: {
+        enabled: true,
+        mode: 'xy',
+        limits: {
+          x: { min: xMin, max: xMax },
+          y: { min: yMin, max: yMax }
+        }
+      },
+      zoom: {
+        wheel: { enabled: true },
+        pinch: { enabled: true },
+        mode: 'xy',
+        limits: {
+          x: {
+            minRange: 1,
+            maxRange: labels.length
+          },
+          y: {
+            minRange: yRange * 0.1,
+            maxRange: yRange
+          }
+        }
+      }
+    };    
+  
     profitLineChart.update();
   } else {
     console.error('Profit Line Chart not found.');
   }
+  
 }

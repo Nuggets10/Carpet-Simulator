@@ -56,19 +56,27 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const ctx = document.getElementById('profitLineChart').getContext('2d');
+
 const profitLineChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: ['Start', 'End'],
+    labels: ["Start", "End"],
     datasets: [{
       label: 'Equity line',
       data: [0, 0],
-      borderColor: 'orange',
-      borderWidth: 2,
+      borderColor: 'white',
+      borderWidth: 4,
       fill: false,
       tension: 0,
       pointRadius: 3,
-      pointBackgroundColor: 'white'
+      pointBackgroundColor: 'white',
+      segment: {
+        borderColor: ctx => {
+          const currentValue = ctx.p1.parsed.y;
+          const previousValue = ctx.p0.parsed.y;
+          return currentValue > previousValue ? 'green' : 'red';
+        }
+      }
     }]
   },
   options: {
@@ -100,7 +108,26 @@ const profitLineChart = new Chart(ctx, {
             return tooltipItems[0].label;
           }
         }
+      },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'xy'
+        },
+        zoom: {
+          wheel: {
+            enabled: true
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'xy'
+        }
       }
     }
   }
+});
+
+document.getElementById('resetButton').addEventListener('click', function () {
+  profitLineChart.resetZoom();
 });

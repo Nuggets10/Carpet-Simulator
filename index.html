@@ -9,30 +9,42 @@
   <link href="style.css" rel="stylesheet" />
   <script src="login.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
 </head>
 
 <body>
   
   <!-- Login -->
-  <div id="loginOverlay">
-    <div class="login-title">Carpet Simulator</div>
-    <div class="login-box">
-      <h2>Access token required</h2>
+<div id="loginOverlay">
+  <div class="login-title">Carpet Simulator</div>
+  <div class="login-box">
+    <h2>Access token required</h2>
 
-      <input type="password" id="loginPassword" placeholder="Enter access token" />
+    <input type="password" id="loginPassword" placeholder="Enter access token" />
 
-      <button type="button" id="togglePassword" class="toggle-password">Show access token</button>
+    <button type="button" id="togglePassword" class="toggle-password">Show access token</button>
 
-      <button onclick="checkPassword()">Login</button>
+    <button onclick="checkPassword()">Login</button>
 
-      <p id="loginError">
-        Incorrect or expired access token.
-        <a href="https://example.com/help" target="_blank" style="color: #ffffff; text-decoration: underline;">
-          Get the latest one on X.
-        </a>
-      </p>
-    </div>
+    <p id="loginError">
+      Incorrect or expired access token.
+      <a href="https://example.com/help" target="_blank" style="color: #ffffff; text-decoration: underline;">
+        Get the latest one on X.
+      </a>
+    </p>
   </div>
+
+  <!-- Disclaimer (inside login overlay, below login box) -->
+  <div id="disclaimer" class="disclaimer">
+    <p>
+      This app does not provide financial advice or suggests trading. <br>
+      Data show in the web app depends on user's input. Downloadable data might not always be up to date. <br>
+      The developer is <strong>not responsible</strong> for any actions or losses resulting from its use.
+    </p>
+  </div>
+</div>
+
 
   <!-- Download Overlay -->
   <div id="downloadOverlay" style="display: none;">
@@ -108,10 +120,25 @@
           <canvas id="valenceChart"></canvas>
         </div>
       </section>
-      <div class="chart-footer-text">
+      <div class="chart-footer-text" style="position: relative;">
         <p id="profitText">Final capital: 0</p>
         <canvas id="profitLineChart" width="600" height="200"></canvas>
+        <button id="resetButton" class="styled-reset-button">Reset chart</button>
       </div>
+      <div class="log-table-container" style="margin-top: 2rem;">
+        <h3>Log Table</h3>
+        <table id="logTable" class="log-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Content</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>    
     </main>
   </div>
 
