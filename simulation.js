@@ -70,7 +70,6 @@ function validateAndCleanCSV(file, callback) {
         return indices.map(i => cells[i]).join(',');
       } else {
         return indices.map((i, colIndex) => {
-          // Treat Date column as a string, no validation
           return cells[i];
         }).join(',');
       }
@@ -107,6 +106,8 @@ function runSimulation(cleanedCSV, params) {
       data = data.reverse();
   }
 
+  clearLogEntries();
+
   let packets = [];
   let ownedPackets = []; // MODIFICATO CAPITAL GAINS TAX
   let capital = funds;
@@ -141,7 +142,7 @@ function runSimulation(cleanedCSV, params) {
       let isLevelAlreadyBought = packets.some(p => p.purchasePrice === level);
       if (MinPrice <= level && level <= MaxPrice && capital >= totalCost && !isLevelAlreadyBought) {
         console.log("Comprato pacchetto a livello " + level + " il " + date + " per (con commissioni) " + totalCost)
-        addLogEntry(date, "Buy", "Bought packet at " + level + " for " + totalCost)
+        addLogEntry(date, "Buy", "Bought packet at " + Math.round(level * 100) / 100 + " for " + Math.round(totalCost * 100) / 100)
         packets.push({
           purchasePrice: level,
           shares: sharesPerPacket,
@@ -161,7 +162,7 @@ function runSimulation(cleanedCSV, params) {
     console.log("Capitale pari a " + capital + " dopo acquisti della giornata: " + date)
 
     // Sell
-    let packetsToSell = packets.filter(p => MaxPrice >= p.purchasePrice + sellTake);
+    let packetsToSell = packets.filter(p => p.purchaseDate < date && MaxPrice >= p.purchasePrice + sellTake && p.purchasePrice + sellTake >= MinPrice);
     if (packetsToSell.length > 0) {
       const sumPurchasePrices = ownedPackets.reduce((sum, p) => sum + p.purchasePrice, 0); // MODIFICATO CAPITAL GAINS TAX
       const averagePurchasePrice = sumPurchasePrices / ownedPackets.length; // MODIFICATO CAPITAL GAINS TAX
@@ -175,7 +176,7 @@ function runSimulation(cleanedCSV, params) {
         const netProceeds = grossProceeds - commissions - capitalGainTax;
 
         console.log("Venduto pacchetto acquistato a " + p.purchasePrice + " il " + date + " per " + (p.purchasePrice + sellTake) + " Dopo tasse: " + netProceeds)
-        addLogEntry(date, "Sell", "Sold packet at " + p.purchasePrice + " for " + netProceeds)
+        addLogEntry(date, "Sell", "Sold packet at " + Math.round(p.purchasePrice * 100) / 100 + " for " + Math.round(netProceeds * 100) / 100)
 
         totalGain += (netProceeds - (p.purchasePrice * p.shares));
         capital += netProceeds;
@@ -261,6 +262,11 @@ function addLogEntry(date, type, content) {
   row.appendChild(contentCell);
 
   tableBody.appendChild(row);
+}
+
+function clearLogEntries() {
+  const tableBody = document.querySelector('#logTable tbody');
+  tableBody.innerHTML = '';
 }
 
 function displayResults(results) {
