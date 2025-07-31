@@ -142,7 +142,7 @@ function runSimulation(cleanedCSV, params) {
       let isLevelAlreadyBought = packets.some(p => p.purchasePrice === level);
       if (MinPrice <= level && level <= MaxPrice && capital >= totalCost && !isLevelAlreadyBought) {
         console.log("Comprato pacchetto a livello " + level + " il " + date + " per (con commissioni) " + totalCost)
-        addLogEntry(date, "Buy", "Bought packet at " + Math.round(level * 100) / 100 + " for " + Math.round(totalCost * 100) / 100)
+        addLogEntry(date, "Buy", "Bought packet at level " + Math.round(level * 100) / 100 + " for " + Math.round(totalCost * 100) / 100)
         packets.push({
           purchasePrice: level,
           shares: sharesPerPacket,
@@ -230,13 +230,18 @@ function runSimulation(cleanedCSV, params) {
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
   const headers = lines[0].split(',').map(h => h.trim());
+  
   return lines.slice(1).map((line, index) => {
-    const values = line.split(',').map(v => v.trim());
+    // Usa una regex per splittare solo sulle virgole che non sono tra numeri decimali
+    const values = line.match(/(?:[^,]+)|(?:"[^"]*")/g).map(v => v.trim());
+    
     const obj = headers.reduce((obj, header, index) => {
       if (header === 'Date') {
         obj[header] = values[index];
       } else {
-        obj[header] = parseFloat(values[index]) || values[index];
+        // Sostituisci la virgola decimale con il punto e converti in numero
+        const value = values[index].replace(',', '.');
+        obj[header] = parseFloat(value) || values[index];
       }
       return obj;
     }, {});
