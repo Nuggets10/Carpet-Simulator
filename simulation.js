@@ -175,8 +175,8 @@ function runSimulation(cleanedCSV, params) {
         const capitalGainTax = (profit > 0 && isInPlus) ? profit * 0.26 : 0; // MODIFICATO CAPITAL GAINS TAX
         const netProceeds = grossProceeds - commissions - capitalGainTax;
 
-        console.log("Venduto pacchetto acquistato a " + p.purchasePrice + " il " + date + " per " + (p.purchasePrice + sellTake) + " Dopo tasse: " + netProceeds)
-        addLogEntry(date, "Sell", "Sold packet at " + Math.round(p.purchasePrice * 100) / 100 + " for " + Math.round(netProceeds * 100) / 100)
+        console.log("Venduto pacchetto acquistato a " + p.targetSellPrice + " il " + date + " per " + p.targetSellPrice + " Dopo tasse: " + netProceeds)
+        addLogEntry(date, "Sell", "Sold packet at " + Math.round(p.targetSellPrice * 100) / 100 + " for " + Math.round(netProceeds * 100) / 100)
 
         totalGain += (netProceeds - (p.purchasePrice * p.shares));
         capital += netProceeds;
