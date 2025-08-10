@@ -21,6 +21,10 @@ document.getElementById('startButton').addEventListener('click', function () {
   const fundsNum = parseFloat(funds);
   const commissionsNum = parseFloat(commissions);
 
+  if (lowestBuyPrice > highestBuyPrice) {
+    alert('Lowest buy price cannot be greater than highest buy price')
+  }
+
   if (!csvFile) {
     alert('Please upload a CSV file.');
     return;
@@ -48,7 +52,25 @@ document.getElementById('startButton').addEventListener('click', function () {
 function validateAndCleanCSV(file, callback) {
   const reader = new FileReader();
   reader.onload = function (e) {
-    const text = e.target.result;
+    let text = e.target.result;
+
+    // Detect if the file uses quotes and comma as decimal separator
+    const hasQuotesAndCommaDecimals = text.includes('"') && text.includes(',');
+
+    if (hasQuotesAndCommaDecimals) {
+      // Remove quotes and replace comma decimals with dots
+      text = text
+        .split('\n')
+        .map(line => {
+          // Remove all quotes
+          let cleanedLine = line.replace(/"/g, '');
+          // Replace commas with dots only in numbers (e.g., "38,123" -> 38.123)
+          cleanedLine = cleanedLine.replace(/(\d+),(\d+)/g, '$1.$2');
+          return cleanedLine;
+        })
+        .join('\n');
+    }
+
     // Normalize line endings and trim whitespace
     const lines = text.replace(/\r\n/g, '\n').trim().split('\n').map(line => line.trim());
     const headers = lines[0].split(',').map(h => h.trim());
@@ -69,11 +91,34 @@ function validateAndCleanCSV(file, callback) {
         // Keep only required headers
         return indices.map(i => cells[i]).join(',');
       } else {
-        return indices.map((i, colIndex) => {
-          return cells[i];
-        }).join(',');
+        // Process data rows
+        const row = indices.map((i, colIndex) => {
+          const cell = cells[i];
+          if (colIndex === 0) {
+            // Validate date format (YYYY-MM-DD)
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(cell)) {
+              callback(`Error: invalid date format at line ${index + 1}: ${cell}. Expected YYYY-MM-DD.`, null);
+              return null;
+            }
+            return cell;
+          } else {
+            // Validate and round numeric values to 2 decimal places
+            const num = parseFloat(cell);
+            if (isNaN(num)) {
+              callback(`Error: invalid number at line ${index + 1}, column ${requiredHeaders[colIndex]}: ${cell}.`, null);
+              return null;
+            }
+            return num.toFixed(2); // Round to 2 decimal places
+          }
+        });
+        if (row.includes(null)) return null; // Skip row if validation failed
+        return row.join(',');
       }
-    }).join('\n');
+    }).filter(line => line !== null).join('\n');
+
+    if (cleanedCSV.includes('Error')) {
+      return; // Error already handled in callback
+    }
 
     callback(null, cleanedCSV);
   };
@@ -142,7 +187,7 @@ function runSimulation(cleanedCSV, params) {
       let isLevelAlreadyBought = packets.some(p => p.purchasePrice === level);
       if (MinPrice <= level && level <= MaxPrice && capital >= totalCost && !isLevelAlreadyBought) {
         console.log("Comprato pacchetto a livello " + level + " il " + date + " per (con commissioni) " + totalCost)
-        addLogEntry(date, "Buy", "Bought packet at level " + Math.round(level * 100) / 100 + " for " + Math.round(totalCost * 100) / 100)
+        addLogEntry(date, "Buy", "Bought packet at " + Math.round(level * 100) / 100 + " for " + Math.round(totalCost * 100) / 100)
         packets.push({
           purchasePrice: level,
           shares: sharesPerPacket,
@@ -175,8 +220,8 @@ function runSimulation(cleanedCSV, params) {
         const capitalGainTax = (profit > 0 && isInPlus) ? profit * 0.26 : 0; // MODIFICATO CAPITAL GAINS TAX
         const netProceeds = grossProceeds - commissions - capitalGainTax;
 
-        console.log("Venduto pacchetto acquistato a " + p.targetSellPrice + " il " + date + " per " + p.targetSellPrice + " Dopo tasse: " + netProceeds)
-        addLogEntry(date, "Sell", "Sold packet at " + Math.round(p.targetSellPrice * 100) / 100 + " for " + Math.round(netProceeds * 100) / 100)
+        console.log("Venduto pacchetto acquistato a " + targetSellPrice + " il " + date + " per " + p.targetSellPrice + " Dopo tasse: " + netProceeds)
+        addLogEntry(date, "Sell", "Sold packet at " + Math.round(targetSellPrice * 100) / 100 + " for " + Math.round(netProceeds * 100) / 100)
 
         totalGain += (netProceeds - (p.purchasePrice * p.shares));
         capital += netProceeds;
@@ -230,18 +275,13 @@ function runSimulation(cleanedCSV, params) {
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
   const headers = lines[0].split(',').map(h => h.trim());
-  
   return lines.slice(1).map((line, index) => {
-    // Usa una regex per splittare solo sulle virgole che non sono tra numeri decimali
-    const values = line.match(/(?:[^,]+)|(?:"[^"]*")/g).map(v => v.trim());
-    
+    const values = line.split(',').map(v => v.trim());
     const obj = headers.reduce((obj, header, index) => {
       if (header === 'Date') {
         obj[header] = values[index];
       } else {
-        // Sostituisci la virgola decimale con il punto e converti in numero
-        const value = values[index].replace(',', '.');
-        obj[header] = parseFloat(value) || values[index];
+        obj[header] = parseFloat(values[index]) || values[index];
       }
       return obj;
     }, {});
