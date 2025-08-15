@@ -6,7 +6,6 @@
 - [🔑 | Get an access token](#--get-an-access-token)
 - [📈 | Usage](#--usage)
 - [✏️ | CSV Format](#--csv-format)
-- [🎯 | Changelog](#--changelog)
 - [🖼 | Flaticon](#--flaticon)
 
 ## 🔑 | Get an access token
@@ -65,14 +64,6 @@ The following are a couple examples of correct CSV files:
 
 (Please note that the CSV file can be of any lenght you desire)
 
-## 🎯 | Changelog
-
-Planned updates & fixes:
-- Download data button
-
-Changelog:
-- v1.0:
-  - First release
 ## 🖼 | Flaticon
 Flaticon icon:
 <a href="https://www.flaticon.com/free-icons/rebranding" title="rebranding icons">Rebranding icons created by Freepik - Flaticon</a>
